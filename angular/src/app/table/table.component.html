@@ -1,0 +1,28 @@
+<div class="container">
+
+<h3>Table</h3>
+
+<div class="row">
+  <span><button class="btn" (click)="add()">Push</button>
+  <button class="btn" (click)="pop()">Pop</button>
+  <!--button class="btn" (click)="boop()">Boop</button--></span>
+</div>
+
+<div class="row">
+  <table>
+    <thead>
+      <tr>
+        <th>name</th>
+        <th>occupation</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let e of entries">
+        <td>{{ e.name }}</td>
+        <td>{{ e.occupation }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+</div>

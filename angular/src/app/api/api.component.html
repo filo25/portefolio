@@ -1,0 +1,25 @@
+<div class="container">
+
+<h3>API</h3>
+
+<div class="row">
+  <span><input type="text" id="search" placeholder="search" />
+  <button id="search" class="btn btn-outline-dark">Search</button></span>
+
+  <div class="col-sm-6">
+    <table>
+      <thead>
+        <th>id</th>
+        <th>title</th>
+      </thead>
+      <tbody>
+        <tr *ngFor="let album of albums">
+          <td>{{ album.id }}</td>
+          <td>{{ album.title }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div>
