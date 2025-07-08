@@ -14,5 +14,11 @@ Command options are
 - decompress
 - getamountrecords
 - printrecords
+- printrecordsbyword
+- printrecordsnomatch
 - exportrecordstopandas
+
+It's possible to run basic tests using
+
+`py.test.exe .\test_crawl.py`
 

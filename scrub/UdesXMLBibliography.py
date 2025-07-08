@@ -6,9 +6,9 @@ import re
 
 
 # with >= 2015
-xmlFile = '2a4c08fe-1438-44a3-b9ff-2ff84d48c3b8.xml'
-xmlFileGz = '2a4c08fe-1438-44a3-b9ff-2ff84d48c3b8.xml.gz'
-xmlFileSafe = '2a4c08fe-1438-44a3-b9ff-2ff84d48c3b8_2.xml'
+xmlFile = '4f2e5af9-8077-4cf1-8d8c-7b18f9f46b88.xml'
+xmlFileGz = '4f2e5af9-8077-4cf1-8d8c-7b18f9f46b88.xml.gz'
+xmlFileSafe = '4f2e5af9-8077-4cf1-8d8c-7b18f9f46b88_2.xml'
 
 #xmlFile = '73477566-11a7-438d-ae8c-6332559ee001.xml'
 #xmlFileGz = '73477566-11a7-438d-ae8c-6332559ee001.xml.gz'
@@ -22,6 +22,19 @@ class UdesXMLBibliography:
         self.xmlFile = xmlFile
         tree = xml.etree.ElementTree.parse(xmlFile)
         self.root = tree.getroot()
+
+        # attitudes
+        # Tissutal and Fluidic Aspects in Osteopathic Manual Therapy: A Narrative Review.
+
+        self.filters = {
+                        #'GOOD': ['somatic dysfunction', 'assessment', 'palpat']
+                        'GOOD': ['somatic dysfunction', 'palpat', 'evidence', 'allosta', 'interexamin', 'reliab', 'biomech', 'palpatory finding'],
+
+                        #'AVG': ['technique', 'report', 'study', 'manipu', 'impact']
+                        'AVG': ['technique', 'report', 'study', 'manipu', 'case'],
+
+                        'BAD': ['treat', 'modalit', 'effect', 'interven', 'injury', 'surgery', 'prevalence']
+                    }
 
 
     def digNode(self, node, verbose=False):
@@ -93,19 +106,26 @@ class UdesXMLBibliography:
         return color + title + Style.RESET_ALL
 
 
-    def highlightWords(self, title, words, color):
+    def highlightWords(self, title, words, color, upper=False):
         A = [s for s in words if s in title.lower()]
         for a in A:
             #title = title.replace(a, color + a + Style.RESET_ALL)
             comp = re.compile(re.escape(a), re.IGNORECASE)
-            title = comp.sub(color + a.capitalize() + Style.RESET_ALL, title)
+            if upper:
+                title = comp.sub(color + a.upper() + Style.RESET_ALL, title)
+            else:
+                title = comp.sub(color + a.capitalize() + Style.RESET_ALL, title)
         return title
 
 
-    def printTitles(self, records, offset = 0, limit = None, 
-                    filteredBad = ['treatment', 'modalit'],
-                    filteredAverage = ['technique', 'report'],
-                    filteredGood = ['somatic dysfunction', 'assessment']):
+    def printTitles(self, records, offset = 0, noPrettyPrint = False, limit = None):
+                    #filteredBad = ['treat', 'modalit', 'effect', 'interven', 'injury', 'surgery', 'prevalence'],
+                    ## attitudes
+                    ## Tissutal and Fluidic Aspects in Osteopathic Manual Therapy: A Narrative Review.
+                    ##filteredAverage = ['technique', 'report', 'study', 'manipu', 'impact'],
+                    #filteredAverage = ['technique', 'report', 'study', 'manipu'],
+                    ##filteredGood = ['somatic dysfunction', 'assessment', 'palpat']):
+                    #filteredGood = ['somatic dysfunction', 'palpat', 'evidence', 'allosta', 'reliab', 'biomech', 'palpatory finding']):
 
         #records2 = self.mangleRecords(records, offset, limit)
         records2 = self.mangleRecords(records, None, None)
@@ -114,15 +134,55 @@ class UdesXMLBibliography:
 
             # the ordering is important, if bad or average are present,
             # they overrule good
-            if any(s in d['title'].lower() for s in filteredBad):
-                print("[{}] BAD \"".format(offset + i) + self.colorTitle(d['title'], Fore.RED) + "\" ({}, {}, {})".format(d['author1'], d['author2'], d['year']))
-            elif any(s in d['title'].lower() for s in filteredAverage):
-                print("[{}] AVG \"".format(offset + i) + self.colorTitle(d['title'], Fore.YELLOW) + "\" ({}, {}, {})".format(d['author1'], d['author2'], d['year']))
-            elif any(s in d['title'].lower() for s in filteredGood):
-                print("[{}] GOOD \"".format(offset + i) + self.highlightWords(d['title'], filteredGood, Fore.GREEN) + "\" ({}, {}, {})".format(d['author1'], d['author2'], d['year']))
+            if any(s in d['title'].lower() for s in self.filters['BAD']):
+                if noPrettyPrint:
+                    print("{},BAD,\"{}\",\"{}, {}\",{}".format(offset + i, d['title'], d['author1'], d['author2'], d['year']))
+                else:
+                    print("[{}] BAD \"".format(offset + i) + self.colorTitle(d['title'], Fore.RED) + "\" ({}, {}, {})".format(d['author1'], d['author2'], d['year']))
+            elif any(s in d['title'].lower() for s in self.filters['AVG']):
+                if noPrettyPrint:
+                    print("{},AVG,\"{}\",\"{}, {}\",{}".format(offset + i, d['title'], d['author1'], d['author2'], d['year']))
+                else:
+                    #print("[{}] AVG \"".format(offset + i) + self.colorTitle(d['title'], Fore.YELLOW) + "\" ({}, {}, {})".format(d['author1'], d['author2'], d['year']))
+                    print("[{}] AVG \"".format(offset + i) + self.highlightWords(d['title'], self.filters['AVG'], Fore.YELLOW) + "\" ({}, {}, {})".format(d['author1'], d['author2'], d['year']))
+            elif any(s in d['title'].lower() for s in self.filters['GOOD']):
+                if noPrettyPrint:
+                    print("{},GOOD,\"{}\",\"{}, {}\",{}".format(offset + i, d['title'], d['author1'], d['author2'], d['year']))
+                else:
+                    print("[{}] GOOD \"".format(offset + i) + self.highlightWords(d['title'], self.filters['GOOD'], Fore.GREEN) + "\" ({}, {}, {})".format(d['author1'], d['author2'], d['year']))
             else:
-                p = "[{}] NONE \"{}\" ({}, {}, {})".format(offset + i, d['title'], d['author1'], d['author2'], d['year'])
-                print(p)
+                if noPrettyPrint:
+                    print("{},NONE,\"{}\",\"{}, {}\",{}".format(offset + i, d['title'], d['author1'], d['author2'], d['year']))
+                else:
+                    print("[{}] NONE \"{}\" ({}, {}, {})".format(offset + i, d['title'], d['author1'], d['author2'], d['year']))
+
+
+    def printTitlesByWord(self, records, offset = 0, noPrettyPrint = False, limit = None, word = None):
+
+        records2 = self.mangleRecords(records, None, None)
+
+        for i, d in enumerate(records2):
+
+            if any(s in d['title'].lower() for s in [ word ]):
+                if noPrettyPrint:
+                    print("{},WORD,\"{}\",\"{}, {}\",{}".format(offset + i, d['title'], d['author1'], d['author2'], d['year']))
+                else:
+                    # MAGENTA, LIGHTCYAN_EX
+                    print("[{}] WORD \"".format(offset + i) + self.highlightWords(d['title'], [ word ], Fore.LIGHTCYAN_EX, True) + "\" ({}, {}, {})".format(d['author1'], d['author2'], d['year']))
+
+
+    def printTitlesNoMatch(self, records, offset = 0, noPrettyPrint = False, limit = None):
+
+        F = []
+        for k,v in self.filters.items():
+            F.extend(v)
+
+        records2 = self.mangleRecords(records, None, None)
+
+        for i, d in enumerate(records2):
+
+            if not any(s in d['title'].lower() for s in F):
+                print("{},\"{}\",\"{}, {}\",{}".format(offset + i, d['title'], d['author1'], d['author2'], d['year']))
 
 
     def printCSVTitles(self, records, offset = 0, limit = None, 

@@ -34,11 +34,40 @@ def getamountrecords():
     print(len(recs))
 
 
-def printrecords(n, offset):
-    print("Showing {} records with offset {}".format(n, offset))
+def printrecords(n, offset, noPrettyPrint):
+    noPrettyPrint = False if noPrettyPrint == None else True
+
+    if not noPrettyPrint:
+        print("Showing {} records with offset {}".format(n, offset))
+
     crawler = UdesXMLBibliography(xmlFile)
     recs = crawler.getRecords(offset, n)
-    crawler.printTitles(recs, offset)
+    crawler.printTitles(recs, offset, noPrettyPrint)
+
+
+def printrecordsbyword(n, offset, noPrettyPrint, word):
+
+    word = "" if not len(word) else word[0]
+    noPrettyPrint = False if noPrettyPrint == None else True
+
+    if not noPrettyPrint:
+        print("Showing {} records with offset {}".format(n, offset))
+
+    crawler = UdesXMLBibliography(xmlFile)
+    recs = crawler.getRecords(offset, n)
+    crawler.printTitlesByWord(recs, offset, noPrettyPrint, word=word)
+
+
+def printrecordsnomatch(n, offset, noPrettyPrint):
+
+    noPrettyPrint = False if noPrettyPrint == None else True
+
+    if not noPrettyPrint:
+        print("Showing {} records with offset {}".format(n, offset))
+
+    crawler = UdesXMLBibliography(xmlFile)
+    recs = crawler.getRecords(offset, n)
+    crawler.printTitlesNoMatch(recs, offset, noPrettyPrint)
 
 
 def exportrecordstopandas(n, offset):
@@ -69,6 +98,67 @@ parserPrintRecs.add_argument(
     default=0,
     type=int,
     help='offset by n records'
+)
+parserPrintRecs.add_argument(
+    '-p',
+    dest='noPrettyPrint',
+    default=None,
+    nargs='*',
+    help='human-readable'
+)
+
+parserPrintRecsByWord = subparsers.add_parser('printrecordsbyword')
+parserPrintRecsByWord.add_argument(
+    '-n',
+    dest='n',
+    default=3,
+    type=int,
+    help='fetch n records'
+)
+parserPrintRecsByWord.add_argument(
+    '-o',
+    dest='offset',
+    default=0,
+    type=int,
+    help='offset by n records'
+)
+parserPrintRecsByWord.add_argument(
+    '-p',
+    dest='noPrettyPrint',
+    default=None,
+    nargs='*',
+    help='human-readable'
+)
+parserPrintRecsByWord.add_argument(
+    '-w',
+    dest='word',
+    type=str,
+    default=None,
+    nargs='*',
+    help='keyword to search'
+)
+
+parserPrintRecsNoMatch = subparsers.add_parser('printrecordsnomatch')
+parserPrintRecsNoMatch.add_argument(
+    '-n',
+    dest='n',
+    default=3,
+    type=int,
+    help='fetch n records'
+)
+parserPrintRecsNoMatch.add_argument(
+    '-o',
+    dest='offset',
+    default=0,
+    type=int,
+    help='offset by n records'
+)
+parserPrintRecsNoMatch.add_argument(
+    '-p',
+    dest='noPrettyPrint',
+    default=None,
+    nargs='*',
+    help='human-readable'
 )
 
 parserExportToPandas = subparsers.add_parser('exportrecordstopandas')
